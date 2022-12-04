@@ -1,7 +1,13 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
-    print("Alberto ")
-    println("Program arguments: ${args.joinToString()}")
+fun main() {
+
+
+    val conexion1: GestorBBDD = GestorBBDD.getInstance()
+
+    conexion1.conectarBBDD()
+
+    //conexion1.insertarFilaProductos()
+    conexion1.selectAll()
+    conexion1.desconexionBBDD()
 
 
 }
