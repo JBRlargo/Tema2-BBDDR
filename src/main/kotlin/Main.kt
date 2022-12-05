@@ -7,7 +7,14 @@ fun main() {
 
     //conexion1.insertarFilaProductos()
     conexion1.selectAll()
+    //conexion1.update()
+    conexion1.selectAll()
+    conexion1.delete()
+    conexion1.selectAll()
+
+
     conexion1.desconexionBBDD()
+
 
 
 }

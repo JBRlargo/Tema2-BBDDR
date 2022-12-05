@@ -1,5 +1,6 @@
 import java.sql.*
 
+
 class GestorBBDD private constructor(){
 
     val url: String = "jdbc:mysql://localhost/"
@@ -19,6 +20,7 @@ class GestorBBDD private constructor(){
         }
     }
     private var con : Connection? = null
+    var savePoint: Savepoint? = null
 
     fun conectarBBDD(){
         try {
@@ -53,13 +55,20 @@ class GestorBBDD private constructor(){
     }
 
     fun insertarFilaProductos(){
-        if(con != null) {
-            val st2: Statement = con!!.createStatement()
-            val nFilas: Int = st2.executeUpdate(Sentencias.insertFila)
+        try{
+            con!!.autoCommit = false
+            if(con != null) {
+                val st2: Statement = con!!.createStatement()
+                val nFilas: Int = st2.executeUpdate(Sentencias.insertFila)
+                con!!.commit()
 
-            if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
-        }else {
-            println("[Base de Datos no conectada]")
+                if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
+
+            }else {
+                println("[Base de Datos no conectada]")
+            }
+        }catch (e: Exception){
+            con!!.rollback(savePoint)
         }
     }
 
@@ -77,4 +86,44 @@ class GestorBBDD private constructor(){
             println("[Base de Datos no conectada]")
         }
     }
+
+    fun update(){
+        try{
+            con!!.autoCommit = false
+        if(con != null) {
+            val st3: Statement = con!!.createStatement()
+            val nFilas: Int = st3.executeUpdate(Sentencias.actualizarFila)
+            con!!.commit()
+
+            if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
+        }else {
+            println("[Base de Datos no conectada]")
+        }
+        }catch (e: Exception){
+            con!!.rollback(savePoint)
+        }
+    }
+
+    fun delete(){
+        try{
+            con!!.autoCommit = false
+        if(con != null) {
+            val st4: Statement = con!!.createStatement()
+            val nFilas: Int = st4.executeUpdate(Sentencias.actualizarFila)
+            con!!.commit()
+
+            if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
+        }else {
+            println("[Base de Datos no conectada]")
+        }
+        }catch (e: Exception){
+            con!!.rollback(savePoint)
+        }
+    }
+
+
+
+
+
+
 }
