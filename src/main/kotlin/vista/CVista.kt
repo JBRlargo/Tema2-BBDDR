@@ -15,6 +15,10 @@ class CVista {
                 "Elija la operación que quiere realizar: ")
         return  readln().toIntOrNull()
     }
+
+    fun ingresoDatos() {
+
+    }
 }
 private fun separador(): String{
     return System.getProperty("line.separator")
