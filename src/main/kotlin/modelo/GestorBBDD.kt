@@ -1,3 +1,5 @@
+package modelo
+
 import java.sql.*
 
 
@@ -11,7 +13,7 @@ class GestorBBDD private constructor(){
     companion object{
         private var instance: GestorBBDD? = null
 
-        fun getInstance() :GestorBBDD{
+        fun getInstance() : GestorBBDD {
             if(instance == null) {
                 instance = GestorBBDD()
             }
@@ -84,7 +86,7 @@ class GestorBBDD private constructor(){
 
             while (rs1.next()) {
 
-                val p = Productos(rs1.getString(1),rs1.getFloat(2))
+                val p = Productos(rs1.getString(1), rs1.getFloat(2))
                 lista.add(p)
 
             }
@@ -105,7 +107,7 @@ class GestorBBDD private constructor(){
 
 
             while (rs1.next()) {
-                val p = Productos(rs1.getString(1),rs1.getFloat(2))
+                val p = Productos(rs1.getString(1), rs1.getFloat(2))
                 lista.add(p)
 
             }
@@ -141,7 +143,7 @@ class GestorBBDD private constructor(){
             con!!.autoCommit = false
         if(con != null) {
             val st4: Statement = con!!.createStatement()
-            val nFilas: Int = st4.executeUpdate(Sentencias.borrarFila+ dato +"';")
+            val nFilas: Int = st4.executeUpdate(Sentencias.borrarFila + dato +"';")
             con!!.commit()
 
             return nFilas

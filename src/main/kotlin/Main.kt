@@ -1,4 +1,5 @@
 import controlador.Controlador
+import modelo.GestorBBDD
 import vista.CVista
 
 fun main() {

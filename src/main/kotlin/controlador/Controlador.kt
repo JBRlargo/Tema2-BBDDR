@@ -1,7 +1,6 @@
 package controlador
 
-import GestorBBDD
-import Productos
+import modelo.GestorBBDD
 import vista.CVista
 import vista.CVista.Operador
 
