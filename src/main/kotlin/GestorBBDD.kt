@@ -122,7 +122,7 @@ class GestorBBDD private constructor(){
             con!!.autoCommit = false
         if(con != null) {
             val st3: Statement = con!!.createStatement()
-            val nFilas: Int = st3.executeUpdate(Sentencias.actualizarFila + dato +"'")
+            val nFilas: Int = st3.executeUpdate(Sentencias.actualizarFila + dato +"';")
             con!!.commit()
 
             return nFilas
@@ -136,12 +136,12 @@ class GestorBBDD private constructor(){
         }
     }
 
-    fun delete():Int?{
+    fun delete(dato:String):Int?{
         try{
             con!!.autoCommit = false
         if(con != null) {
             val st4: Statement = con!!.createStatement()
-            val nFilas: Int = st4.executeUpdate(Sentencias.borrarFila)
+            val nFilas: Int = st4.executeUpdate(Sentencias.borrarFila+ dato +"';")
             con!!.commit()
 
             return nFilas
