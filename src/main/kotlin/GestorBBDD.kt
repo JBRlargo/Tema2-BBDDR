@@ -54,7 +54,7 @@ class GestorBBDD private constructor(){
         }
     }
 
-    fun insertarFilaProductos(){
+    fun insertarFilaProductos(): Int?{
         try{
             con!!.autoCommit = false
             if(con != null) {
@@ -62,62 +62,96 @@ class GestorBBDD private constructor(){
                 val nFilas: Int = st2.executeUpdate(Sentencias.insertFila)
                 con!!.commit()
 
-                if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
+                return nFilas
 
             }else {
                 println("[Base de Datos no conectada]")
+                return null
             }
         }catch (e: Exception){
             con!!.rollback(savePoint)
+            return null
         }
     }
 
-    fun selectAll(){
+    fun selectAll(): MutableList<Productos>?{
+
         if(con != null){
             val st : Statement = con!!.createStatement()
             val rs1 : ResultSet = st.executeQuery(Sentencias.selectAll)
 
+            val lista: MutableList<Productos> = mutableListOf()
+
             while (rs1.next()) {
-                println(rs1.getString(1))
-                println(rs1.getString(2))
+
+                val p = Productos(rs1.getString(1),rs1.getFloat(2))
+                lista.add(p)
 
             }
+
+        return lista
+
         } else {
             println("[Base de Datos no conectada]")
+            return null
+        }
+    }
+    fun selectDato(dato :String): MutableList<Productos>?{
+        if(con != null){
+            val st : Statement = con!!.createStatement()
+            val rs1 : ResultSet = st.executeQuery(Sentencias.selectDato + dato + "';")
+
+            val lista: MutableList<Productos> = mutableListOf()
+
+
+            while (rs1.next()) {
+                val p = Productos(rs1.getString(1),rs1.getFloat(2))
+                lista.add(p)
+
+            }
+
+            return lista
+        } else {
+            println("[Base de Datos no conectada]")
+            return null
         }
     }
 
-    fun update(){
+    fun update(dato :String): Int?{
         try{
             con!!.autoCommit = false
         if(con != null) {
             val st3: Statement = con!!.createStatement()
-            val nFilas: Int = st3.executeUpdate(Sentencias.actualizarFila)
+            val nFilas: Int = st3.executeUpdate(Sentencias.actualizarFila + dato +"'")
             con!!.commit()
 
-            if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
+            return nFilas
         }else {
             println("[Base de Datos no conectada]")
+            return null
         }
         }catch (e: Exception){
             con!!.rollback(savePoint)
+            return null
         }
     }
 
-    fun delete(){
+    fun delete():Int?{
         try{
             con!!.autoCommit = false
         if(con != null) {
             val st4: Statement = con!!.createStatement()
-            val nFilas: Int = st4.executeUpdate(Sentencias.actualizarFila)
+            val nFilas: Int = st4.executeUpdate(Sentencias.borrarFila)
             con!!.commit()
 
-            if (nFilas > 0) println("${nFilas} afectada(s)") else println("Ninguna fila afectada")
+            return nFilas
         }else {
             println("[Base de Datos no conectada]")
+            return null
         }
         }catch (e: Exception){
             con!!.rollback(savePoint)
+            return null
         }
     }
 
