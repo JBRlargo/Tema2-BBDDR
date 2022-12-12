@@ -3,26 +3,26 @@ package modelo
 import java.sql.*
 
 
-class GestorBBDD private constructor(){
+class GestorBBDD private constructor(val url: String, val bd: String, val user: String, val pass: String){
 
-    val url: String = "jdbc:mysql://localhost/"
-    val bd: String = "almacen"
-    val user: String = "root"
-    val pass: String = ""
+//    val url: String = "jdbc:mysql://localhost/"
+//    val bd: String = "almacen"
+//    val user: String = "root"
+//    val pass: String = ""
 
     companion object{
         private var instance: GestorBBDD? = null
 
-        fun getInstance() : GestorBBDD {
+        fun getInstance(url: String, bd: String, user: String, pass: String) : GestorBBDD {
             if(instance == null) {
-                instance = GestorBBDD()
+                instance = GestorBBDD(url, bd, user, pass)
             }
             return instance!!
 
         }
     }
     private var con : Connection? = null
-    var savePoint: Savepoint? = null
+    private var savePoint: Savepoint? = null
 
     fun conectarBBDD(){
         try {
@@ -35,10 +35,10 @@ class GestorBBDD private constructor(){
             //Utilizamos la clase DriverManager
             con = DriverManager.getConnection(url + bd, user, pass)
 
-            if (con != null)
-                println("[Conexion realizada]")
-            else
-                println("No existe conexion a la Base de Datos")
+//            if (con != null)
+//                println("[Conexion realizada]")
+//            else
+//                println("No existe conexion a la Base de Datos")
         }
         catch (e: ClassNotFoundException){
             e.printStackTrace()
@@ -50,88 +50,107 @@ class GestorBBDD private constructor(){
     fun desconexionBBDD(){
         if(con != null){
             con!!.close()
-            println("Desconexion realizada")
-        } else{
-            println("No existe conexion a la Base de Datos")
         }
     }
 
-    fun insertarFilaProductos(): Int?{
+    fun insertarFilaProductos(producto: Producto): Int?{
         try{
-            con!!.autoCommit = false
             if(con != null) {
-                val st2: Statement = con!!.createStatement()
-                val nFilas: Int = st2.executeUpdate(Sentencias.insertFila)
+                con!!.autoCommit = false
+                val pSProducto : PreparedStatement = con!!.prepareStatement(Sentencias.insertFila)
+                pSProducto.setString(1, producto.nombre)
+                pSProducto.setFloat(2, producto.precio!!)
+                val nFilas: Int = pSProducto.executeUpdate()
                 con!!.commit()
 
                 return nFilas
 
             }else {
-                println("[Base de Datos no conectada]")
                 return null
             }
         }catch (e: Exception){
-            con!!.rollback(savePoint)
+            //con!!.rollback(savePoint)
             return null
         }
     }
 
-    fun selectAll(): MutableList<Productos>?{
+    fun selectAll(): List<Producto>?{
+        try {
+            if(con != null){
+                val st : Statement = con!!.createStatement()
+                val rs1 : ResultSet = st.executeQuery(Sentencias.selectAll)
 
+                val lista: MutableList<Producto> = mutableListOf()
+
+                while (rs1.next()) {
+
+                    val p = Producto(rs1.getString(1), rs1.getFloat(2))
+                    lista.add(p)
+
+                }
+
+                return lista.toList()
+
+            } else {
+                return null
+            }
+        } catch (e: Exception) {
+            return null
+        }
+    }
+    fun selectDato(dato :String): Producto?{
         if(con != null){
-            val st : Statement = con!!.createStatement()
-            val rs1 : ResultSet = st.executeQuery(Sentencias.selectAll)
+            val pS : PreparedStatement = con!!.prepareStatement(Sentencias.selectDato)
+            pS.setString(1, dato)
+            val rs1 : ResultSet = pS.executeQuery()
 
-            val lista: MutableList<Productos> = mutableListOf()
+            var producto: Producto? = null
+
 
             while (rs1.next()) {
-
-                val p = Productos(rs1.getString(1), rs1.getFloat(2))
-                lista.add(p)
+                producto = Producto(rs1.getString(1), rs1.getFloat(2))
 
             }
 
-        return lista
-
+            return producto
         } else {
-            println("[Base de Datos no conectada]")
-            return null
-        }
-    }
-    fun selectDato(dato :String): MutableList<Productos>?{
-        if(con != null){
-            val st : Statement = con!!.createStatement()
-            val rs1 : ResultSet = st.executeQuery(Sentencias.selectDato + dato + "';")
-
-            val lista: MutableList<Productos> = mutableListOf()
-
-
-            while (rs1.next()) {
-                val p = Productos(rs1.getString(1), rs1.getFloat(2))
-                lista.add(p)
-
-            }
-
-            return lista
-        } else {
-            println("[Base de Datos no conectada]")
             return null
         }
     }
 
-    fun update(dato :String): Int?{
+    fun updateNombre(producto: Producto, dato :String): Int?{
         try{
             con!!.autoCommit = false
         if(con != null) {
-            val st3: Statement = con!!.createStatement()
-            val nFilas: Int = st3.executeUpdate(Sentencias.actualizarFila + dato +"';")
+            val psUpdate: PreparedStatement = con!!.prepareStatement(Sentencias.actualizarNombre)
+            psUpdate.setString(1, dato)
+            psUpdate.setString(2, producto.nombre)
+
+            val nFilas: Int = psUpdate.executeUpdate()
             con!!.commit()
 
             return nFilas
         }else {
-            println("[Base de Datos no conectada]")
             return null
         }
+        }catch (e: Exception){
+            con!!.rollback(savePoint)
+            return null
+        }
+    } fun updatePrecio(producto: Producto, dato :Float): Int?{
+        try{
+            con!!.autoCommit = false
+            if(con != null) {
+                val psUpdate: PreparedStatement = con!!.prepareStatement(Sentencias.actualizarPrecio)
+                psUpdate.setFloat(1, dato)
+                psUpdate.setString(2, producto.nombre)
+                val nFilas: Int = psUpdate.executeUpdate()
+                con!!.commit()
+
+                return nFilas
+            }else {
+                return null
+            }
         }catch (e: Exception){
             con!!.rollback(savePoint)
             return null
@@ -141,14 +160,13 @@ class GestorBBDD private constructor(){
     fun delete(dato:String):Int?{
         try{
             con!!.autoCommit = false
-        if(con != null) {
-            val st4: Statement = con!!.createStatement()
-            val nFilas: Int = st4.executeUpdate(Sentencias.borrarFila + dato +"';")
-            con!!.commit()
-
-            return nFilas
+            if(con != null) {
+                val pSDelete: PreparedStatement = con!!.prepareStatement(Sentencias.borrarFila)
+                pSDelete.setString(1, dato)
+                val nFilas: Int = pSDelete.executeUpdate()
+                con!!.commit()
+                return nFilas
         }else {
-            println("[Base de Datos no conectada]")
             return null
         }
         }catch (e: Exception){
@@ -157,9 +175,13 @@ class GestorBBDD private constructor(){
         }
     }
 
-
-
-
-
-
+    fun crearTabla() {
+        try {
+            if(con != null) {
+                val statement: Statement = con!!.createStatement()
+                statement.execute(Sentencias.crearTabla)
+            }
+        }catch (_: Exception){
+        }
+    }
 }

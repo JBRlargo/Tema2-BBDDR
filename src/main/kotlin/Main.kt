@@ -1,16 +1,11 @@
 import controlador.Controlador
-import modelo.GestorBBDD
 import vista.CVista
 
 fun main() {
 
-    val conexion1: GestorBBDD = GestorBBDD.getInstance()
-
-    conexion1.conectarBBDD()
-
     val v = CVista()
     val c = Controlador(v)
-
+    c.iniciar()
     c.onStart()
 
 }

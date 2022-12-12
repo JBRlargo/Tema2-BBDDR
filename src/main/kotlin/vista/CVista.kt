@@ -1,5 +1,7 @@
 package vista
 
+import modelo.Producto
+
 class CVista {
     enum class Operador {
         BUSQUEDA, MODIFICACION, ELIMINACION
@@ -12,7 +14,7 @@ Si devuelve nulo es que no ha introducido un valor
  */
     fun inicio(): Int? {
         print(
-            "Bienvenido a la aplicación." + separador() +
+            "Bienvenido a la aplicación" + separador() +
                     "(1). Ingresar datos" + separador() +
                     "(2). Consulta general" + separador() +
                     "(3). Consultar dato determinado" + separador() +
@@ -25,6 +27,13 @@ Si devuelve nulo es que no ha introducido un valor
     }
 
     /*
+    Despide la aplicación
+     */
+    fun despedirse() {
+        println("Cerrando aplicación. Hasta luego.")
+    }
+
+    /*
 Si el inicio da error, esta función será llamada para avisar al usuario
  */
     fun errorInicio(op: Int?) {
@@ -33,16 +42,14 @@ Si el inicio da error, esta función será llamada para avisar al usuario
         } else {
             print("Por favor, introduzca un entero dentro del rango.")
         }
-        println("Solo son válidos los valores del '0' al '5'.")
+        println(" Solo son válidos los valores del '0' al '5'.")
+        print(separador())
     }
 
     /*
 Si el usuario llama a la función (1), comenzará el ingreso de datos
  */
-    fun ingresoDatos() {
-        /*
-    TODO Se tiene que devolver un producto
-     */
+    fun ingresoDatos(): Producto {
         print(
             "Comencemos la ingresión de datos" + separador() +
                     "Escriba el nombre del producto: "
@@ -50,23 +57,55 @@ Si el usuario llama a la función (1), comenzará el ingreso de datos
         val nombreProducto = readln()
         print("Escriba el precio del producto: ")
         val precioProducto: Float? = readln().toFloatOrNull()
+        return Producto(nombreProducto, precioProducto)
+    }
+
+    /*
+    Si ha habido algún error al introducir el precio, se llamará a esta función
+     */
+    fun errorIngresoPrecio():String {
+        print("Error a la hora de introducir el precio." + separador() +
+        "¿Quiere introducirlo de nuevo (s/N)? ")
+        return readln()
+    }
+
+    /*
+    Una vez que se haya finalizado la inserción, se avisará al usuario si ha habido algún error
+     */
+    fun respuestaIngreso(insercion: Int?) {
+        when(insercion) {
+            0 -> println("No se ha podido ingresar el producto")
+            1 -> println("Se ha ingresado el producto correctamente")
+            else -> println("Error en la base de datos. No se puede añadir el producto")
+        }
+        print(separador())
     }
 
     /*
 Si el usuario llama a la función (2), mostrará el contenido de toda la tabla
  */
-    fun consultaGeneral() {
-        /*
-    TODO Recibir una lista y mostrarla
-     */
+    fun consultaGeneral(lista: List<Producto>?) {
+        if (lista != null) {
+            if(lista.isNotEmpty()) {
+                for(producto in lista) {
+                    println("Producto:")
+                    mostrarProducto(producto)
+                }
+            } else {
+                println("No se ha encontrado ningún producto")
+            }
+        } else {
+            println("La base de datos no está conectada")
+        }
+        print(separador())
     }
 
     /*
-Si el usario llama las funciones (3), (4) o (5), se llamará a esta función genérica a la que le especificará
+Si el usuario llama las funciones (3), (4) o (5), se llamará a esta función genérica a la que le especificará
 lo que quiera realizar el usuario. Se manda el producto el cual quiere buscar
  */
     fun busqueda(operador: Operador): String {
-        print("Ingrese el nombre del producto que busca a " + evaluadorOperador(operador) + ": ")
+        print("Ingrese el nombre del producto que quiere " + evaluadorOperador(operador) + ": ")
         return readln()
     }
 
@@ -84,10 +123,9 @@ Función para especificar lo que quiere realizar en la búsqueda genérica
     /*
 Función para mostrar producto en específico
  */
-    fun consultaEspecifica() {
-        /*
-    TODO Recibir un producto y mostrarlo por pantalla
-     */
+    fun consultaEspecifica(producto: Producto) {
+        mostrarProducto(producto)
+        print(separador())
     }
 
     /*
@@ -95,6 +133,7 @@ Mostrarle al usuario que ha habido un error al buscar el producto
  */
     fun errorBusquedaProducto(nombreProducto: String) {
         println("Error, el producto '$nombreProducto' no existe. Por favor, introduzca otro")
+        print(separador())
     }
 
     /*
@@ -105,16 +144,26 @@ Pregunta al usuario que va a modificar del producto
             "¿Qué atributo quiere modificar?" + separador() +
                     "(1) Nombre" + separador() +
                     "(2) Precio" + separador() +
-                    "(0) Salir"
+                    "(0) Salir" + separador() +
+            "Introduzca el operador: "
         )
         return readln().toIntOrNull()
     }
 
     /*
-Modificación de nombre del producto
- */
+    Si el usuario ha introducido incorrectamente el operador, se le avisará
+     */
+    fun errorOperadorModificacion(): String {
+        print("Error a la hora de introducir el operador." + separador() +
+                "¿Quiere introducirlo de nuevo (s/N)? ")
+        return readln()
+    }
+
+    /*
+    Modificación de nombre del producto
+    */
     fun modificarNombre(): String {
-        print("Escribe el nuevo nombre del producto")
+        print("Escribe el nuevo nombre del producto: ")
         return readln()
     }
 
@@ -122,32 +171,46 @@ Modificación de nombre del producto
 Modificación del precio del producto
  */
     fun modificarPrecio(): Float? {
-        print("Escribe el nuevo precio del producto")
+        print("Escribe el nuevo precio del producto: ")
         return readln().toFloatOrNull()
     }
 
     /*
 Confirmación de la modificación del producto
  */
-    fun productoModificado() {
-        println("El producto ha sido modificado")
+    fun productoModificado(modificacion: Int?) {
+        when(modificacion) {
+            0 -> println("No se ha podido modificar el producto")
+            1 -> println("Se ha modificado el producto correctamente")
+            else -> println("Error en la base de datos. No se puede modificar el producto")
+        }
+        print(separador())
     }
 
     /*
-Informar de error a la hora de modificar el precio
- */
-    fun errorModificacionPrecio() {
-        println("Error a la hora de modificar el precio. Introduzca un valor válido")
+    Confirmación de la eliminación del producto
+    */
+    fun eliminacionRealizada(eliminacion: Int?) {
+        when(eliminacion) {
+            0 -> println("No se ha podido eliminar el producto")
+            1 -> println("Se ha eliminado el producto correctamente")
+            else -> println("Error en la base de datos. No se puede eliminar el producto")
+        }
+        print(separador())
     }
 
     /*
-Confirmación de la eliminación del producto
- */
-    fun eliminacionRealizada() {
-        println("Se ha eliminado el producto")
-    }
-
-    private fun separador(): String {
+    Separador del sistema
+     */
+    fun separador(): String {
         return System.getProperty("line.separator")
+    }
+
+    /*
+    Como se muestra el producto
+     */
+    private fun mostrarProducto(producto: Producto) {
+        println("Nombre: " + producto.nombre + separador() +
+                "Precio: " + producto.precio + "€")
     }
 }
